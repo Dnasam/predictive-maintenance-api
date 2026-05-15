@@ -1,7 +1,7 @@
-from fastapi import FastAPI
+'''from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
-import psycopg2
+#import psycopg2
 
 # -------------------------
 # Load model (GLOBAL)
@@ -84,6 +84,50 @@ def predict(data: MachineData):
     )
 
     conn.commit()
+
+    return {
+        "prediction": "Failure" if prediction == 1 else "No Failure",
+        "confidence": round(probability, 2)
+    }
+'''
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+import joblib
+
+# Load model
+model = joblib.load("models/model.pkl")
+
+# Initialize app
+app = FastAPI()
+
+# Request schema
+class MachineData(BaseModel):
+    air_temperature: float
+    process_temperature: float
+    rotational_speed: float
+    torque: float
+    tool_wear: float
+
+# Home route
+@app.get("/")
+def home():
+    return {"message": "Predictive Maintenance API is running"}
+
+# Prediction route
+@app.post("/predict")
+def predict(data: MachineData):
+
+    input_data = [[
+        data.air_temperature,
+        data.process_temperature,
+        data.rotational_speed,
+        data.torque,
+        data.tool_wear
+    ]]
+
+    prediction = model.predict(input_data)[0]
+    probability = model.predict_proba(input_data)[0][1]
 
     return {
         "prediction": "Failure" if prediction == 1 else "No Failure",
