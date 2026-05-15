@@ -112,7 +112,13 @@ class MachineData(BaseModel):
 # Home route
 @app.get("/")
 def home():
-    return {"message": "Predictive Maintenance API is running"}
+    return {
+        "project": "Predictive Maintenance API",
+        "status": "running",
+        "model": "Random Forest Classifier",
+        "docs": "/docs"
+    }
+
 
 # Prediction route
 @app.post("/predict")
